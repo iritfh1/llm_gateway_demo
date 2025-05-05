@@ -41,11 +41,31 @@
 #     res = search.run(f"{name}")
 #     return res
 
-from langchain_community.tools.tavily_search import TavilySearchResults
+#Tool that queries the Tavily Search API and gets back json.
+# pip install -U langchain-community tavily-python  
+# export TAVILY_API_KEY="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"
 
+from langchain_community.tools import TavilySearchResults
 
-def get_profile_url_tavily(name: str):
-    """Searches for Linkedin or twitter Profile Page."""
-    search = TavilySearchResults()
-    res = search.run(f"{name}")
-    return res
+def get_profile_url_tavily(name: str) -> str:
+    """Searches for LinkedIn Profile URL using Tavily."""
+
+    search = TavilySearchResults(
+            max_results=5,
+            include_answer=True,
+            include_raw_content=True,
+            include_images=True,
+            # search_depth="advanced",
+            # include_domains = []
+            # exclude_domains = []
+        )
+
+    results = search.run(f"{name}")
+
+    # Iterate through results and look for a LinkedIn URL
+    for item in results:
+        url = item.get("url", "")
+        if "linkedin.com" in url.lower():
+            return url
+
+    return ""  # Return empty string if no LinkedIn URL found
